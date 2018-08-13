@@ -1,0 +1,16 @@
+# Configuration file for Harbormaster
+# Rename this file to settings.cfg and fill in the blanks
+# Configured for Gmail by default
+
+[garages]
+preferred_garage = ''
+backup_garage = ''
+
+[email]
+recipient = ''
+host = 'smtp.gmail.com'
+port = '587'
+security = 'tls'
+username = ''
+password = ''
+

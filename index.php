@@ -66,7 +66,7 @@ if (($preferred < 5) && ($backup < 5)) {
 	$message = $backup . " spots available";
 }
 
-if (!ISSET($_GET['nomail'])) {
+if (ISSET($_GET['email'])) {
 
 	$mail = new PHPMailer;
 
@@ -95,6 +95,7 @@ if (!ISSET($_GET['nomail'])) {
 
 echo '<html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Harbormaster | ' . $subject . '</title>
 <link type="text/css" rel="stylesheet" media="all" href="style.css">
 </head>
@@ -110,6 +111,7 @@ echo '<html>
 <div id="content-wrapper">
 <div id="content">';
 
+
 if (($preferred > $backup) || ($preferred > 50)) {
 	echo '<p><strong>' . $preferred . '</strong> spots available in <strong>' . $settings['preferred_garage'] . '</strong></p>
 	<p><strong>' . $backup . '</strong> spots available in <strong>' . $settings['backup_garage'] . '</strong></p>';
@@ -122,6 +124,7 @@ echo '</div> <!-- #content -->
 </div> <!-- #content-wrapper -->
 
 <div id="footer">
+<p><strong>' . date('F j, Y \a\t g:i a') . '</strong></p>
 <p><a href="https://github.com/brianwarner/harbormaster">Harbormaster</a><br>
 &copy; <a href="https://bdwarner.com">Brian Warner</a></p>
 </div> <!-- #footer -->

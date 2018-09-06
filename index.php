@@ -51,9 +51,9 @@ $garages = json_decode($status);
 foreach ($garages as $garage) {
 
 	if ($garage->name == $settings['preferred_garage']) {
-		$preferred = $garage->SubscriberCapacity - $garage->SubscriberCount;
+		$preferred = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
 	} elseif ($garage->name == $settings['backup_garage']) {
-		$backup = $garage->SubscriberCapacity - $garage->SubscriberCount;
+		$backup = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
 	}
 }
 
@@ -119,11 +119,35 @@ echo '>
 <div id="content">';
 
 if (($preferred > $backup) || ($preferred > 50)) {
-	echo '<p><strong>' . $preferred . '</strong> spots available in <strong>' . $settings['preferred_garage'] . '</strong></p>
-	<p><strong>' . $backup . '</strong> spots available in <strong>' . $settings['backup_garage'] . '</strong></p>';
+	echo '<p><strong>' . $preferred . '</strong> spot';
+
+	if ($preferred != 1) {
+		echo 's';
+	}
+
+	echo ' available in <strong>' . $settings['preferred_garage'] . '</strong></p>
+	<p><strong>' . $backup . '</strong> spot';
+
+	if ($backup != 1) {
+		echo 's';
+	}
+
+	echo ' available in <strong>' . $settings['backup_garage'] . '</strong></p>';
 } else {
-	echo '<p>' . $backup . ' spots available in ' . $settings['backup_garage'] . '</p>
-	<p>' . $preferred . ' spots available in ' . $settings['preferred_garage'] . '</p>';
+	echo '<p>' . $backup . ' spot';
+
+	if ($backup != 1) {
+		echo 's';
+	}
+
+	echo ' available in ' . $settings['backup_garage'] . '</p>
+	<p>' . $preferred . ' spot';
+
+	if ($preferred != 1) {
+		echo 's';
+	}
+
+	echo ' available in ' . $settings['preferred_garage'] . '</p>';
 }
 
 echo '</div> <!-- #content -->

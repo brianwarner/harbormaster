@@ -43,6 +43,8 @@ include_once "PHPMailer/src/SMTP.php";
 
 $settings = parse_ini_file('settings.cfg');
 
+date_default_timezone_set('America/New_York');
+
 $status = file_get_contents('https://www.csuohio.edu/apps/parking/feed.php');
 $garages = json_decode($status);
 
@@ -129,7 +131,7 @@ echo '</div> <!-- #content -->
 
 <div id="footer">
 <p><strong>' . date('F j, Y \a\t g:i a') . '</strong></p>
-<p><a href="https://github.com/brianwarner/harbormaster">Harbormaster</a><br>
+<p><a href="https://github.com/brianwarner/harbormaster">Harbormaster on <img src="./github-mark.png" alt="GitHub mark"></a><br>
 &copy; <a href="https://bdwarner.com">Brian Warner</a></p>
 </div> <!-- #footer -->
 </div> <!-- #content -->

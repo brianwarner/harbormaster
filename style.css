@@ -16,6 +16,10 @@
 * SPDX-License-Identifier:	Apache-2.0
 */
 
+#body {
+	width: 100%;
+}
+
 #page-wrapper {
 	margin: 0 auto;
 	width: 1280px;

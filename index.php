@@ -95,7 +95,6 @@ if (ISSET($_GET['email'])) {
 
 echo '<html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Harbormaster | ' . $subject . '</title>
 <link type="text/css" rel="stylesheet" media="all" href="style.css">
 </head>

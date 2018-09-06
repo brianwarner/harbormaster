@@ -100,7 +100,13 @@ echo '<html>
 </head>
 <body>
 
-<div id="page-wrapper">
+<div id="page-wrapper"';
+
+if (($preferred < 5) && ($backup < 5)) {
+	echo ' class="warning"';
+}
+
+echo '>
 <div id="header">
 <div id="site-title">
 <h1>' . $subject . '</h1>
@@ -109,7 +115,6 @@ echo '<html>
 
 <div id="content-wrapper">
 <div id="content">';
-
 
 if (($preferred > $backup) || ($preferred > 50)) {
 	echo '<p><strong>' . $preferred . '</strong> spots available in <strong>' . $settings['preferred_garage'] . '</strong></p>

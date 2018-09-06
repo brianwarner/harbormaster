@@ -30,10 +30,19 @@
 	text-align: center;
 }
 
+#page-wrapper.warning {
+	background-color: red;
+	color: white;
+}
+
 a:link, a:visited {
 	color: #111;
 	font-weight: bold;
 	text-decoration: none;
+}
+
+.warning a:link, .warning a:visited {
+	color: white;
 }
 
 #header {
@@ -50,6 +59,11 @@ a:link, a:visited {
 	border-bottom: 1px solid grey;
 	min-height: 200px;
 	margin: 20px 0;
+}
+
+.warning #content-wrapper {
+	border-color: white;
+
 }
 
 #content {

@@ -41,7 +41,11 @@ include_once "PHPMailer/src/PHPMailer.php";
 include_once "PHPMailer/src/Exception.php";
 include_once "PHPMailer/src/SMTP.php";
 
-$settings = parse_ini_file('settings.cfg');
+if (file_exists("google_analytics.inc")) {
+	include_once "google_analytics.inc";
+}
+
+$settings = parse_ini_file('settings.cfg',FALSE,INI_SCANNER_TYPED);
 
 date_default_timezone_set('America/New_York');
 
@@ -57,15 +61,133 @@ foreach ($garages as $garage) {
 	}
 }
 
-if (($preferred < 5) && ($backup < 5)) {
+// Get the weather, if an API key was set
+
+$openweathermap_api_key = $settings['openweathermap_api_key'];
+
+$rain = False;
+$snow = False;
+$heat = False;
+$cold = False;
+$high = -100;
+$low = 200;
+$entry = 2;
+$precipitation_end = 0;
+
+if ($openweathermap_api_key) {
+
+	$weather_url = "http://api.openweathermap.org/data/2.5/forecast?id=5150529&lang=en&units=imperial&cnt=3&APPID=" . $openweathermap_api_key;
+
+	$weather = json_decode(file_get_contents($weather_url));
+
+	foreach ($weather->list as $weather_detail) {
+		if (property_exists($weather_detail,'rain')) {
+			if (array_key_exists('3h',$weather_detail->rain)) {
+				$rain = True;
+				$precipitation_end = 3 * $entry;
+			}
+		}
+
+		if (property_exists($weather_detail,'snow')) {
+			if (array_key_exists('3h',$weather_detail->snow)) {
+				$snow = True;
+				$precipitation_end = 3 * $entry;
+			}
+		}
+
+		if ($weather_detail->main->temp_max > $high) {
+			$high = $weather_detail->main->temp_max;
+		}
+
+		if ($weather_detail->main->temp_min < $low) {
+			$low = $weather_detail->main->temp_min;
+		}
+
+		$entry += 1;
+	}
+
+	if ($high > 85) {
+		$temperature = 'it will be <strong>hot</strong>';
+	} elseif ($low < 45) {
+		$temperature = 'it will be <strong>chilly</strong>';
+	} elseif ($low < 35) {
+		$temperature = 'it will be <strong>cold</strong>';
+	} elseif ($low < 15) {
+		$temperature = 'it will be <strong>very cold</strong>';
+	} else {
+		$temperature = '';
+	}
+
+	if ($rain && !$snow) {
+		$precipitation = 'it may <strong>rain</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
+	} elseif (!$rain && $snow) {
+		$precipitation = 'it may <strong>snow</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
+	} elseif ($rain && $snow) {
+		$precipitation = 'it may <strong>rain and snow</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
+	} else {
+		$precipitation = '';
+	}
+
+	if ($temperature && $precipitation) {
+		$forecast = ucfirst($temperature) . ' and ' . $precipitation;
+	} elseif ($temperature && !$precipitation) {
+		$forecast = ucfirst($temperature);
+	} elseif (!$termperature && $precipitation) {
+		$forecast = ucfirst($precipitation);
+	} else {
+		$forecast = '';
+	}
+}
+
+if (($preferred < 10) && ($backup < 10)) {
+
 	$subject = "Park in the street";
-	$message = "Lots are full, park elsewhere.";
+	$message = "Lots are full, park elsewhere.\n" . $forecast;
+	$selected_garage = 'none';
+
 } elseif (($preferred > $backup) || ($preferred > 50)) {
+
 	$subject = "Park in " . $settings['preferred_garage'];
-	$message = $preferred . " spots available.";
+	$message = $preferred . " spots available.\n" . $forecast;
+	$selected_garage = 'preferred';
+
+	// Determine if weather overrides decision
+
+	if ($rain || $snow || $heat || $cold) {
+		if (!$settings['preferred_garage_weathersafe']) {
+			if (($settings['backup_garage_weathersafe']) && ($backup > 10)) {
+
+				$subject = "Park in " . $settings['backup_garage'];
+				$message = $backup . " spots available.\n" . $forecast;
+				$selected_garage = 'backup';
+
+			} else {
+				$message .= "\nBe prepared for the weather.";
+			}
+		}
+	}
+
 } else {
+
 	$subject = "Park in " . $settings['backup_garage'];
-	$message = $backup . " spots available";
+	$message = $backup . " spots available.\n" . $forecast;
+	$selected_garage = 'backup';
+
+	// Determine if weather overrides decision
+
+	if ($rain || $snow || $heat || $cold) {
+		if (!$settings['backup_garage_weathersafe']) {
+			if (($settings['preferred_garage_weathersafe']) && ($preferred > 10)) {
+
+				$subject = "Park in " . $settings['preferred_garage'];
+				$message = $backup . " spots available.\n" . $forecast;
+				$selected_garage = 'preferred';
+
+			} else {
+				$message .= "\nBe prepared for the weather.";
+			}
+		}
+	}
 }
 
 if (ISSET($_GET['email'])) {
@@ -99,12 +221,24 @@ echo '<html>
 <head>
 <title>Harbormaster | ' . $subject . '</title>
 <link type="text/css" rel="stylesheet" media="all" href="style.css">
+
+<script type="text/javascript">
+	var date_generated = new Date("' . date('Y/m/d H:i:s') . '");
+	onload = function () {
+		onfocus = function () {
+			if (Date.now() - date_generated > 10*60*1000) {
+				location.reload (true)
+			}
+		}
+	}
+</script>
+
 </head>
 <body>
 
 <div id="page-wrapper"';
 
-if (($preferred < 5) && ($backup < 5)) {
+if ($selected_garage == 'none') {
 	echo ' class="warning"';
 }
 
@@ -118,7 +252,12 @@ echo '>
 <div id="content-wrapper">
 <div id="content">';
 
-if (($preferred > $backup) || ($preferred > 50)) {
+if ($forecast) {
+	echo '<p>' . $forecast . '</p>';
+}
+
+if ($selected_garage == 'preferred') {
+
 	echo '<p><strong>' . $preferred . '</strong> spot';
 
 	if ($preferred != 1) {
@@ -134,20 +273,20 @@ if (($preferred > $backup) || ($preferred > 50)) {
 
 	echo ' available in <strong>' . $settings['backup_garage'] . '</strong></p>';
 } else {
-	echo '<p>' . $backup . ' spot';
+	echo '<p><strong>' . $backup . '</strong> spot';
 
 	if ($backup != 1) {
 		echo 's';
 	}
 
-	echo ' available in ' . $settings['backup_garage'] . '</p>
-	<p>' . $preferred . ' spot';
+	echo ' available in <strong>' . $settings['backup_garage'] . '</strong></p>
+	<p><strong>' . $preferred . '</strong> spot';
 
 	if ($preferred != 1) {
 		echo 's';
 	}
 
-	echo ' available in ' . $settings['preferred_garage'] . '</p>';
+	echo ' available in <strong>' . $settings['preferred_garage'] . '</strong></p>';
 }
 
 echo '</div> <!-- #content -->
@@ -160,6 +299,6 @@ echo '</div> <!-- #content -->
 </div> <!-- #footer -->
 </div> <!-- #content -->
 </body>
-</html';
+</html>';
 
 ?>

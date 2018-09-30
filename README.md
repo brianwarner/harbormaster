@@ -22,7 +22,9 @@ To use Harbormaster:
     * 'Prospect Garage'
     * 'East Garage'
 
-  b) Add your email and password (it's configured for Gmail by default)
+  b) Decide which (if any) garage is weathersafe.
+
+  c) Add your email and password (it's configured for Gmail by default)
 
 3. Set a cron job to wget or curl http://yourharbormasterURL?email
 

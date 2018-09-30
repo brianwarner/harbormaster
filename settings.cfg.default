@@ -4,7 +4,9 @@
 
 [garages]
 preferred_garage = ''
+preferred_garage_weathersafe = No
 backup_garage = ''
+backup_garage_weathersafe = Yes
 
 [email]
 recipient = ''
@@ -13,4 +15,7 @@ port = '587'
 security = 'tls'
 username = ''
 password = ''
+
+[weather]
+openweathermap_api_key = ''
 

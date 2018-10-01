@@ -65,8 +65,8 @@ foreach ($garages as $garage) {
 
 $openweathermap_api_key = $settings['openweathermap_api_key'];
 
-$rain = False;
-$snow = False;
+$rain = 0;
+$snow = 0;
 $heat = False;
 $cold = False;
 $high = -100;
@@ -83,14 +83,14 @@ if ($openweathermap_api_key) {
 	foreach ($weather->list as $weather_detail) {
 		if (property_exists($weather_detail,'rain')) {
 			if (array_key_exists('3h',$weather_detail->rain)) {
-				$rain = True;
+				$rain += $weather_detail->rain->{'3h'};
 				$precipitation_end = 3 * $entry;
 			}
 		}
 
 		if (property_exists($weather_detail,'snow')) {
 			if (array_key_exists('3h',$weather_detail->snow)) {
-				$snow = True;
+				$snow += $weather_detail->snow->{'3h'};
 				$precipitation_end = 3 * $entry;
 			}
 		}
@@ -118,11 +118,11 @@ if ($openweathermap_api_key) {
 		$temperature = '';
 	}
 
-	if ($rain && !$snow) {
+	if ($rain > 2.5 && $snow == 0) {
 		$precipitation = 'it may <strong>rain</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
-	} elseif (!$rain && $snow) {
+	} elseif ($rain == 0 && $snow > 15) {
 		$precipitation = 'it may <strong>snow</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
-	} elseif ($rain && $snow) {
+	} elseif ($rain > 2.5 && $snow > 15) {
 		$precipitation = 'it may <strong>rain and snow</strong> in the next <strong>' . $precipitation_end . '</strong> hours';
 	} else {
 		$precipitation = '';
@@ -175,7 +175,7 @@ if (($preferred < 10) && ($backup < 10)) {
 
 	// Determine if weather overrides decision
 
-	if ($rain || $snow || $heat || $cold) {
+	if ($rain > 2.5 || $snow > 15 || $heat || $cold) {
 		if (!$settings['backup_garage_weathersafe']) {
 			if (($settings['preferred_garage_weathersafe']) && ($preferred > 10)) {
 

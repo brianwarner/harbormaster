@@ -21,3 +21,5 @@ openweathermap_api_key = ''
 rain_threshold = 2.5
 snow_threshold = 15
 
+[cache]
+cache seconds = 300

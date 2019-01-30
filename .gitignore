@@ -1,3 +1,4 @@
 settings.cfg
 PHPMailer
-cached.html
+*cached.html
+*.swp

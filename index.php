@@ -237,7 +237,6 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 		#page-wrapper {
 			margin: 0 auto;
 			width: 1280px;
-			border: 1px solid grey;
 			padding: 10px 5px;
 			color: #333;
 			font-size: 280%;

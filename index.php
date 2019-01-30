@@ -41,12 +41,18 @@ include_once "PHPMailer/src/PHPMailer.php";
 include_once "PHPMailer/src/Exception.php";
 include_once "PHPMailer/src/SMTP.php";
 
-if (file_exists("google_analytics.inc")) {
-	include_once "google_analytics.inc";
+if (ISSET($_GET['me'])) {
+	$variant = 'me';
+} elseif (ISSET($_GET['email'])) {
+	$variant = 'email';
+} elseif (ISSET($_GET['android'])) {
+	$variant = 'android';
+} else {
+	$variant = 'web';
 }
 
 $settings = parse_ini_file('settings.cfg',FALSE,INI_SCANNER_TYPED);
-$cache_file = 'cached.html';
+$cache_file = $variant . '-cached.html';
 $cache_seconds = $settings['cache seconds'];
 
 // Use the cached info, if current and available
@@ -127,12 +133,15 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 
 		if ($high > 85) {
 			$temperature = 'it will be <strong>hot</strong>';
-		} elseif ($low < 45) {
-			$temperature = 'it will be <strong>chilly</strong>';
-		} elseif ($low < 35) {
-			$temperature = 'it will be <strong>cold</strong>';
+			$heat = True;
 		} elseif ($low < 15) {
 			$temperature = 'it will be <strong>very cold</strong>';
+			$cold = True;
+		} elseif ($low < 35) {
+			$temperature = 'it will be <strong>cold</strong>';
+			$cold = True;
+		} elseif ($low < 45) {
+			$temperature = 'it will be <strong>chilly</strong>';
 		} else {
 			$temperature = '';
 		}
@@ -210,7 +219,13 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	}
 
 	$html = '<html>
-	<head>
+	<head>';
+	if (file_exists("google_analytics.inc")) {
+		include_once "google_analytics.inc";
+	}
+
+	$html .= '<meta name="viewport" content="width=100%">
+
 	<title>Harbormaster</title>
 
 	<style type="text/css">
@@ -354,6 +369,7 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	<a href="https://bdwarner.com">&copy; Brian Warner</a></p>
 	</div> <!-- #footer -->
 	</div> <!-- #content -->
+
 	</body>
 </html>
 ';

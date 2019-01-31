@@ -69,9 +69,9 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 
 	foreach ($garages as $garage) {
 
-		if ($garage->name == $settings['preferred_garage']) {
+		if ($garage->name == $settings['preferred_garage'] . ' Garage') {
 			$preferred = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
-		} elseif ($garage->name == $settings['backup_garage']) {
+		} elseif ($garage->name == $settings['backup_garage'] . ' Garage') {
 			$backup = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
 		}
 	}
@@ -220,74 +220,83 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 
 	$html = '<html>
 	<head>';
+
 	if (file_exists("google_analytics.inc")) {
 		include_once "google_analytics.inc";
-	}
+}
 
-	$html .= '<meta name="viewport" content="width=100%">
+	$html .= '
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<title>Harbormaster</title>
 
 	<style type="text/css">
 
-		#body {
-			width: 100%;
-		}
-
-		#page-wrapper {
-			margin: 0 auto;
-			width: 1280px;
-			padding: 10px 5px;
-			color: #333;
-			font-size: 280%;
-			text-align: center;
-		}
-
-		#page-wrapper.warning {
-			background-color: red;
-			color: white;
+		* {
+			box-sizing: border-box;
 		}
 
 		a:link, a:visited {
-			color: #111;
+			color: #262626;
 			font-weight: bold;
-			text-decoration: none;
+			text-decoration: underline;
+			text-decoration-color: #7DBA42;
 		}
 
 		.warning a:link, .warning a:visited {
 			color: white;
+			text-decoration-color: white;
 		}
 
-		#header {
-			padding: 20px 0;
-			width: 100%;
+		#page-wrapper {
 		}
 
-		#site-title {
+		#page-wrapper.warning {
+			background-color: red;
+		}
+
+		.large {
+			font-size: calc(50px + (60 - 50) * ((100vw - 300px) / (1200 - 300)));
 			font-weight: bold;
 		}
 
-		#content-wrapper {
+		table {
+			color: #262626;
+			height: 100%;
+			width: 100%;
+			text-align: center;
+			min-height: 400px;
+		}
+
+		.warning table {
+			color: white;
+		}
+
+		td#header {
+			font-size: calc(50px + (60 - 50) * ((100vw - 300px) / (1200 - 300)));
+			padding: 10px;
+			height: 25%;
+		}
+
+		td#content {
+			font-size: calc(26px + (36 - 26) * ((100vw - 300px) / (1200 - 300)));
 			border-top: 1px solid grey;
-			border-bottom: 1px solid grey;
-			min-height: 200px;
-			margin: 20px 0;
-		}
-
-		.warning #content-wrapper {
-			border-color: white;
-
-		}
-
-		#content {
-
 			padding: 10px;
 		}
 
-		#footer {
-			font-size: 80%;
-			margin-top: 10px;
-			text-align: center;
+		.warning td#content {
+			border-top: 1px solid white;
+		}
+
+		td#footer {
+			font-size: calc(14px + (26 - 14) * ((100vw - 300px) / (1200 - 300)));
+			border-top: 1px solid grey;
+			height: 15%;
+			padding: 20px;
+		}
+
+		.warning td#footer {
+			border-top: 1px solid white;
 		}
 
 	</style>
@@ -313,14 +322,13 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	}
 
 	$html .= '>
-	<div id="header">
-	<div id="site-title">
-	<h1>' . $subject . '</h1>
-	</div><!-- #site-title -->
-	</div><!-- #header -->
 
-	<div id="content-wrapper">
-	<div id="content">';
+	<table>
+	<tr>
+		<td id="header"><span class="large">' . $subject . '</span></td>
+	</tr>
+	<tr>
+		<td id="content">';
 
 	if ($forecast) {
 		$html .= '<p>' . $forecast . '</p>';
@@ -328,47 +336,33 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 
 	if ($selected_garage == 'preferred') {
 
-		$html .= '<p><strong>' . $preferred . '</strong> spot';
+		$html .= '<p><span class="large"><strong>' . $preferred . '</strong></span><br>
+		available in <strong>' . $settings['preferred_garage'] . '</strong></p>
 
-		if ($preferred != 1) {
-			$html .= 's';
-		}
+		<p><span class="large"><strong>' . $backup . '</strong></span><br>
+		available in <strong>' . $settings['backup_garage'] . '</strong></p>';
 
-		$html .= ' available in <strong>' . $settings['preferred_garage'] . '</strong></p>
-		<p><strong>' . $backup . '</strong> spot';
-
-		if ($backup != 1) {
-			$html .= 's';
-		}
-
-		$html .= ' available in <strong>' . $settings['backup_garage'] . '</strong></p>';
 	} else {
-		$html .= '<p><strong>' . $backup . '</strong> spot';
 
-		if ($backup != 1) {
-			$html .= 's';
-		}
+		$html .= '<p><span class="large"><strong>' . $backup . '</strong></span><br>
+		available in <strong>' . $settings['backup_garage'] . '</strong></p>
 
-		$html .= ' available in <strong>' . $settings['backup_garage'] . '</strong></p>
-		<p><strong>' . $preferred . '</strong> spot';
-
-		if ($preferred != 1) {
-			$html .= 's';
-		}
-
-		$html .= ' available in <strong>' . $settings['preferred_garage'] . '</strong></p>';
+		<p><span class="large"><strong>' . $preferred . '</strong></span><br>
+		available in <strong>' . $settings['preferred_garage'] . '</strong></p>';
 	}
 
-	$html .= '</div> <!-- #content -->
-	</div> <!-- #content-wrapper -->
+	$html .= '</td>
+	</tr>
+	<tr>
+		<td id="footer">
+			<p><strong>' . date('F j, Y \a\t g:i a') . '<br>
+			Harbormaster is open source</strong></p>
+			<a href="https://bdwarner.com">&copy; Brian Warner</a></p>
+		</td>
+	</tr>
+	</table>
 
-	<div id="footer">
-	<p><strong>' . date('F j, Y \a\t g:i a') . '</strong></p>
-	<p><a href="https://github.com/brianwarner/harbormaster">Harbormaster on GitHub</a><br>
-	<a href="https://bdwarner.com">&copy; Brian Warner</a></p>
-	</div> <!-- #footer -->
-	</div> <!-- #content -->
-
+	</div>
 	</body>
 </html>
 ';
@@ -412,3 +406,5 @@ if (ISSET($_GET['email'])) {
 }
 
 ?>
+
+

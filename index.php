@@ -356,7 +356,7 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	<tr>
 		<td id="footer">
 			<p><strong>' . date('F j, Y \a\t g:i a') . '<br>
-			Harbormaster is open source</strong></p>
+			Harbormaster is <a href="https://github.com/brianwarner/harbormaster">open source</a></strong></p>
 			<a href="https://bdwarner.com">&copy; Brian Warner</a></p>
 		</td>
 	</tr>

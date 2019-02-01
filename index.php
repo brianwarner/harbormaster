@@ -48,7 +48,22 @@ if (ISSET($_GET['me'])) {
 } elseif (ISSET($_GET['android'])) {
 	$variant = 'android';
 } else {
-	$variant = 'web';
+
+	$ua_string = $_SERVER['HTTP_USER_AGENT'];
+
+	if (strpos($ua_string,"Android") > 0) {
+
+		// Android user, show link to Play store
+		$variant = 'web-android';
+
+	} elseif (strpos($ua_string,"iPhone") > 0) {
+
+		// iPhone user, show bookmark instructions
+		$variant = 'web-iphone';
+
+	} else {
+		$variant = 'web';
+	}
 }
 
 $settings = parse_ini_file('settings.cfg',FALSE,INI_SCANNER_TYPED);
@@ -354,10 +369,18 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	$html .= '</td>
 	</tr>
 	<tr>
-		<td id="footer">
+		<td id="footer">';
+
+	if ($variant == 'web-android') {
+		$html .= '<p><a href="https://play.google.com/store/apps/details?id=com.bdwarner.harbormaster">Get the app on Google Play</a></p>';
+	} elseif ($variant == 'web-iphone') {
+		$html .= '<p><strong>Tap <img src="/share.png"> to add a link to your home screen</strong></p>';
+	}
+
+	$html .= '
 			<p><strong>' . date('F j, Y \a\t g:i a') . '<br>
 			Harbormaster is <a href="https://github.com/brianwarner/harbormaster">open source</a></strong></p>
-			<a href="https://bdwarner.com">&copy; Brian Warner</a></p>
+			<p><a href="https://bdwarner.com">&copy; Brian Warner</a></p>
 		</td>
 	</tr>
 	</table>

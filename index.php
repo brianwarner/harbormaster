@@ -160,7 +160,7 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 			$forecast = ucfirst($temperature) . ' and ' . $precipitation;
 		} elseif ($temperature && !$precipitation) {
 			$forecast = ucfirst($temperature);
-		} elseif (!$termperature && $precipitation) {
+		} elseif (!$temperature && $precipitation) {
 			$forecast = ucfirst($precipitation);
 		} else {
 			$forecast = '';

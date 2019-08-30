@@ -80,16 +80,25 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 	date_default_timezone_set('America/New_York');
 
 	$status = file_get_contents('https://www.csuohio.edu/apps/parking/feed.php');
-	$garages = json_decode($status);
 
-	foreach ($garages as $garage) {
+    if ($status === false) {
 
-		if ($garage->name == $settings['preferred_garage'] . ' Garage') {
-			$preferred = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
-		} elseif ($garage->name == $settings['backup_garage'] . ' Garage') {
-			$backup = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
-		}
-	}
+        $preferred = -99;
+        $backup = -99;
+
+    } else {
+
+        $garages = json_decode($status);
+
+        foreach ($garages as $garage) {
+
+            if ($garage->name == $settings['preferred_garage'] . ' Garage') {
+                $preferred = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
+            } elseif ($garage->name == $settings['backup_garage'] . ' Garage') {
+                $backup = max(0,$garage->SubscriberCapacity - $garage->SubscriberCount);
+            }
+        }
+    }
 
 	// Get the weather, if an API key was set
 
@@ -182,11 +191,19 @@ if (file_exists($cache_file) && time() - $cache_seconds < filemtime($cache_file)
 		}
 	}
 
-	if (($preferred < 5) && ($backup < 5)) {
+    if (($preferred == -99) && ($backup == -99)) {
+
+        $subject = "CSU's site is down";
+        $message = "CSU's site is down.";
+        $selected_garage = 'none';
+        $preferred = '?';
+        $backup = '?';
+
+    } elseif (($preferred < 5) && ($backup < 5)) {
 
 		$subject = "Park in the street";
 		$message = "Lots are full, park elsewhere.\n" . $forecast;
-		$selected_garage = 'none';
+        $selected_garage = 'none';
 
 	} elseif (($preferred > $backup) || ($preferred > 50)) {
 
